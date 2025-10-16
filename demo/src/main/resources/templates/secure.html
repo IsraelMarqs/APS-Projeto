@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Página Segura</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; max-width: 800px; margin: 40px auto; }
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);}
+        .avatar { border-radius:50%; width:72px; height:72px; }
+        .btn { background:#4285F4; color:white; padding:8px 12px; border-radius:4px; text-decoration:none; display:inline-block }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Área Segura</h1>
+
+    <div>
+        <img th:if="${picture}" th:src="${picture}" alt="avatar" class="avatar"/>
+        <p>Nome: <strong th:text="${userName}">Nome</strong></p>
+        <p>Email: <strong th:text="${userEmail}">email</strong></p>
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button class="btn" type="submit">Sair</button>
+    </form>
+
+    <p><a th:href="@{/}">Voltar</a></p>
+</div>
+</body>
+</html>
