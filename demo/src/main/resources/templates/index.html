@@ -2,34 +2,53 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
-    <title>Demo - Login</title>
+    <title>Biblioconnect</title>
     <style>
-        body { font-family: Arial, Helvetica, sans-serif; max-width: 800px; margin: 40px auto; }
+        body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 40px auto; }
+        header { text-align:center; margin-bottom:20px }
+        h1 { color:#2c3e50; }
         .card { border: 1px solid #ddd; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);}
         .btn { background:#4285F4; color:white; padding:10px 16px; border-radius:4px; text-decoration:none; display:inline-block }
-        .logout { background:#777 }
+        .muted { color:#666; font-size:0.95em }
+        .user { float:right; font-size:0.95em }
+        .clear { clear:both }
     </style>
 </head>
 <body>
+<header>
+    <h1>Biblioconnect</h1>
+    <p class="muted">Sistema de empréstimo de livros entre alunos e comunidade — compartilhe, empreste e descubra leituras.</p>
+</header>
 <div class="card">
-    <h1>Biblioconnect — Login de teste</h1>
-
     <div th:if="${userName}">
-        <p>Olá, <strong th:text="${userName}">Usuário</strong> (<span th:text="${userEmail}">email</span>)</p>
-        <p><a th:href="@{/secure}">Ir para página segura</a></p>
-        <form th:action="@{/logout}" method="post">
+        <div class="user">
+            <span th:if="${picture}"><img th:src="${picture}" alt="avatar" style="width:48px;height:48px;border-radius:50%;vertical-align:middle;margin-right:8px"/></span>
+            <strong th:text="${userName}">Usuário</strong>
+            (<span th:text="${userEmail}">email</span>)
+        </div>
+        <h2>Bem-vindo ao Biblioconnect</h2>
+        <p>Você está autenticado. Aqui no futuro você poderá procurar livros, listar seus empréstimos, cadastrar ofertas de livros e gerenciar solicitações.</p>
+        <p><a th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="btn">Sair</a></p>
+        <form id="logoutForm" th:action="@{/logout}" method="post" style="display:none">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <button class="btn logout" type="submit">Sair</button>
         </form>
     </div>
 
     <div th:unless="${userName}">
-        <p>Para acessar, faça login com sua conta Google.</p>
-        <a class="btn" th:href="@{/oauth2/authorization/google}">Entrar com Google</a>
+        <h2>Entrar ou criar conta</h2>
+        <p>Para começar a compartilhar e pedir livros, faça login ou crie uma conta.</p>
+        <p>
+            <a class="btn" th:href="@{/login}">Entrar</a>
+            <span style="display:inline-block;width:10px"></span>
+            <a class="btn" th:href="@{/register}">Cadastrar</a>
+        </p>
+        <div th:if="${hasGoogle}">
+            <hr/>
+            <p class="muted">Ou entre com sua conta Google</p>
+            <a class="btn" th:href="@{/oauth2/authorization/google}">Entrar com Google</a>
+        </div>
     </div>
-
-    <hr/>
-    <p style="font-size:0.9em;color:#666">Observação: configure as variáveis de ambiente <code>GOOGLE_CLIENT_ID</code> e <code>GOOGLE_CLIENT_SECRET</code> antes de rodar a aplicação. Veja README para instruções.</p>
+    <div class="clear"></div>
 </div>
 </body>
 </html>
