@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -33,11 +34,20 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model,
+                        @RequestParam(value = "error", required = false) String error,
+                        @RequestParam(value = "logout", required = false) String logout) {
         String clientId = env.getProperty("GOOGLE_CLIENT_ID");
         String propClientId = env.getProperty("spring.security.oauth2.client.registration.google.client-id");
         boolean hasGoogle = (clientId != null && !clientId.isBlank()) || (propClientId != null && !propClientId.isBlank());
         model.addAttribute("hasGoogle", hasGoogle);
+
+        if (error != null) {
+            model.addAttribute("errorMessage", "Usuário ou senha inválidos. Tente novamente.");
+        }
+        if (logout != null) {
+            model.addAttribute("successMessage", "Você saiu com sucesso.");
+        }
         return "login";
     }
 
