@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitar Empréstimo</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:40px auto; background:#f6f8fb }
+        .card { border:1px solid #e6e9ee; padding:20px; border-radius:8px; background:white; box-shadow:0 6px 18px rgba(31,45,61,0.06); animation:fadeIn .4s ease }
+        .btn { background:#4f46e5; color:white; padding:8px 12px; border-radius:6px; text-decoration:none; border:none; cursor:pointer }
+        .btn:focus { outline: 2px solid rgba(79,70,229,0.25) }
+        .muted { color:#6b7280 }
+        textarea { width:100%; min-height:100px; padding:10px; border:1px solid #e5e7eb; border-radius:6px }
+        .meta { color:#374151 }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(6px) } to { opacity:1; transform: translateY(0) } }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Solicitar Empréstimo</h2>
+    <div class="meta">Livro: <strong th:text="${book.title}"></strong></div>
+    <div class="meta">Proprietário: <strong th:text="${book.owner.name}"></strong> (<span th:text="${book.owner.email}"></span>)</div>
+    <div style="margin-top:12px">
+        <form th:action="@{/books/{id}/request(id=${book.id})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <label for="message" class="muted">Mensagem para o proprietário (opcional)</label>
+            <textarea id="message" name="message" placeholder="Escreva quando quer pegar o livro, horários e observações..."></textarea>
+            <div style="margin-top:12px">
+                <button type="submit" class="btn">Enviar solicitação</button>
+                <a th:href="@{/}" style="margin-left:10px; color:#6b7280; text-decoration:none">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+
