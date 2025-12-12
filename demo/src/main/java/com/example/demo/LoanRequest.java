@@ -30,7 +30,7 @@ public class LoanRequest {
     public enum Status {
         PENDING, ACCEPTED, DECLINED
     }
-
+    private boolean seen = false;
     public LoanRequest() {}
 
     // Getters and setters
@@ -51,5 +51,8 @@ public class LoanRequest {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public boolean isSeen() { return seen; }
+    public void setSeen(boolean seen) { this.seen = seen; }
 }
 

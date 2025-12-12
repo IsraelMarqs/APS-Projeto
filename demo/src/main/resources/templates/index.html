@@ -41,8 +41,22 @@
         <p>Você está autenticado. Aqui no futuro você poderá procurar livros, listar seus empréstimos, cadastrar ofertas de livros e gerenciar solicitações.</p>
         <p>
             <a th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="btn">Sair</a>
-            <a th:href="@{/requests}" class="small-link">Meus pedidos</a>
-            <a th:href="@{/requests/received}" class="small-link">Pedidos recebidos</a>
+
+            <a th:href="@{/requests}" class="small-link" style="position:relative">
+                Meus pedidos
+                <span th:if="${updatesCount > 0}"
+                      th:text="${updatesCount}"
+                      style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px; position:absolute; top:-5px; right:-10px; font-weight:bold">
+                </span>
+            </a>
+
+            <a th:href="@{/requests/received}" class="small-link" style="position:relative; margin-left:15px">
+                Pedidos recebidos
+                <span th:if="${incomingCount > 0}"
+                      th:text="${incomingCount}"
+                      style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px; position:absolute; top:-5px; right:-10px; font-weight:bold">
+                </span>
+            </a>
         </p>
         <form id="logoutForm" th:action="@{/logout}" method="post" style="display:none">
         </form>

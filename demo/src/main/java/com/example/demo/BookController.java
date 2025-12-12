@@ -17,7 +17,7 @@ public class BookController {
 
     private final BookService bookService;
     private final UserRepository userRepository;
-    private final AIService aiService; // 1. Injetar o serviço
+    private final AIService aiService;
 
     public BookController(BookService bookService, UserRepository userRepository, AIService aiService) {
         this.bookService = bookService;
@@ -25,13 +25,12 @@ public class BookController {
         this.aiService = aiService;
     }
 
+    // --- CRIAR LIVRO ---
     @GetMapping("/new")
     public String createForm(Model model, Authentication authentication) {
-        // Only authenticated users can create books (form users or OAuth users)
         String email = getAuthenticatedEmail(authentication);
-        if (email == null) {
-            return "redirect:/login";
-        }
+        if (email == null) return "redirect:/login"; // Segurança extra
+
         model.addAttribute("book", new Book());
         model.addAttribute("categories", getCategories());
         model.addAttribute("formAction", "/books/new");
@@ -39,29 +38,38 @@ public class BookController {
     }
 
     @PostMapping("/new")
-    public String createSubmit(@Valid @ModelAttribute Book book, BindingResult bindingResult, Authentication authentication, Model model) {
+    public String createSubmit(@Valid @ModelAttribute Book book,
+                               BindingResult bindingResult,
+                               Authentication authentication,
+                               Model model) {
         String email = getAuthenticatedEmail(authentication);
-        if (email == null) {
-            return "redirect:/login";
-        }
+        if (email == null) return "redirect:/login";
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", getCategories());
             model.addAttribute("formAction", "/books/new");
             return "book_form";
         }
+
+        // Associa o livro ao usuário logado (Google ou Normal)
         userRepository.findByEmail(email).ifPresent(book::setOwner);
+
+        // Garante que o livro nasce disponível
+        book.setAvailable(true);
+
         bookService.save(book);
         return "redirect:/";
     }
 
+    // --- EDITAR LIVRO ---
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model, Authentication authentication) {
         Optional<Book> opt = bookService.findById(id);
         if (opt.isEmpty()) return "redirect:/";
+
         Book book = opt.get();
-        if (!isOwner(authentication, book)) {
-            return "redirect:/books/" + id;
-        }
+        if (!isOwner(authentication, book)) return "redirect:/books/" + id; // Só o dono edita
+
         model.addAttribute("book", book);
         model.addAttribute("categories", getCategories());
         model.addAttribute("formAction", "/books/" + id + "/edit");
@@ -69,19 +77,24 @@ public class BookController {
     }
 
     @PostMapping("/{id}/edit")
-    public String editSubmit(@PathVariable Long id, @Valid @ModelAttribute Book bookForm, BindingResult bindingResult, Authentication authentication, Model model) {
+    public String editSubmit(@PathVariable Long id,
+                             @Valid @ModelAttribute Book bookForm,
+                             BindingResult bindingResult,
+                             Authentication authentication,
+                             Model model) {
         Optional<Book> opt = bookService.findById(id);
         if (opt.isEmpty()) return "redirect:/";
+
         Book book = opt.get();
-        if (!isOwner(authentication, book)) {
-            return "redirect:/books/" + id;
-        }
+        if (!isOwner(authentication, book)) return "redirect:/books/" + id;
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", getCategories());
             model.addAttribute("formAction", "/books/" + id + "/edit");
             return "book_form";
         }
-        // update mutable fields
+
+        // Atualiza campos
         book.setTitle(bookForm.getTitle());
         book.setAuthors(bookForm.getAuthors());
         book.setPublishedYear(bookForm.getPublishedYear());
@@ -90,14 +103,20 @@ public class BookController {
         book.setLanguage(bookForm.getLanguage());
         book.setLocation(bookForm.getLocation());
         book.setContactNumber(bookForm.getContactNumber());
+
+        // CORREÇÃO: Adicionado a atualização da descrição (faltava no seu código)
+        book.setDescription(bookForm.getDescription());
+
         bookService.save(book);
         return "redirect:/";
     }
 
+    // --- DELETAR LIVRO ---
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, Authentication authentication) {
         Optional<Book> opt = bookService.findById(id);
         if (opt.isEmpty()) return "redirect:/";
+
         Book book = opt.get();
         if (isOwner(authentication, book)) {
             bookService.delete(book);
@@ -105,48 +124,60 @@ public class BookController {
         return "redirect:/";
     }
 
+    // --- VISUALIZAR LIVRO ---
     @GetMapping("/{id}")
     public String view(@PathVariable Long id, Model model, Authentication authentication) {
         Optional<Book> opt = bookService.findById(id);
         if (opt.isEmpty()) return "redirect:/";
+
         Book book = opt.get();
         model.addAttribute("book", book);
+
         boolean owner = isOwner(authentication, book);
         model.addAttribute("isOwner", owner);
+
         return "book_view";
     }
 
+    // --- SOLICITAR EMPRÉSTIMO ---
     @GetMapping("/{id}/request")
     public String requestLoan(@PathVariable Long id, Model model, Authentication authentication) {
         Optional<Book> opt = bookService.findById(id);
         if (opt.isEmpty()) return "redirect:/";
+
         Book book = opt.get();
         model.addAttribute("book", book);
         return "request";
     }
 
+    // --- GERAÇÃO IA ---
     @PostMapping("/generate-description")
-    @ResponseBody // Importante: indica que retorna dados, não uma página HTML
+    @ResponseBody
     public Map<String, String> generateDescription(@RequestBody Map<String, String> payload) {
         String title = payload.get("title");
         String authors = payload.get("authors");
-
         String description = aiService.generateBookDescription(title, authors);
-
         return Map.of("description", description);
     }
 
+    // --- MÉTODOS AUXILIARES ---
+
+    // Verifica se o usuário logado é dono do livro
     private boolean isOwner(Authentication authentication, Book book) {
         String email = getAuthenticatedEmail(authentication);
         return email != null && book.getOwner() != null && email.equals(book.getOwner().getEmail());
     }
 
+    // Extrai o email independente do tipo de login (Google ou Senha)
     private String getAuthenticatedEmail(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) return null;
         Object principal = authentication.getPrincipal();
+
+        // Login normal
         if (principal instanceof CustomUserDetails) {
             return ((CustomUserDetails) principal).getUsername();
         }
+        // Login Google
         if (principal instanceof OAuth2User) {
             Object email = ((OAuth2User) principal).getAttribute("email");
             return email == null ? null : email.toString();

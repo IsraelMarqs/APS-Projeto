@@ -25,14 +25,13 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model, Authentication authentication, @RequestParam(value = "q", required = false) String q) {
-        // 1. Verifica se o Google Login está configurado (Environment ou Properties)
+        // 1. Verifica configuração do Google
         String envId = env.getProperty("GOOGLE_CLIENT_ID");
         String propId = env.getProperty("spring.security.oauth2.client.registration.google.client-id");
         boolean hasGoogle = (envId != null && !envId.isBlank()) || (propId != null && !propId.isBlank());
-
         model.addAttribute("hasGoogle", hasGoogle);
 
-        // 2. Lógica de Autenticação (OAuth ou Login padrão)
+        // 2. Dados do Usuário Logado (Google ou Normal)
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof OAuth2User oauth) {
@@ -45,20 +44,25 @@ public class HomeController {
             }
         }
 
-        // 3. Busca de livros
+        // 3. Busca e Listagem de Livros
         List<Book> books;
         if (q != null && !q.isBlank()) {
             books = bookService.search(q);
         } else {
+            // Usa o método que mostra apenas disponíveis (se você já aplicou a lógica da pergunta anterior)
             books = bookService.findAllOrdered();
         }
         model.addAttribute("books", books);
         model.addAttribute("q", q == null ? "" : q);
 
-        // 4. Verifica permissão de adicionar livros (Apenas usuários internos por enquanto)
+        // 4. CORREÇÃO: Lógica do botão "Adicionar Livros"
+        // Agora aceita tanto CustomUserDetails (Senha) quanto OAuth2User (Google)
         boolean canAdd = false;
-        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof CustomUserDetails) {
-            canAdd = true;
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetails || principal instanceof OAuth2User) {
+                canAdd = true;
+            }
         }
         model.addAttribute("canAdd", canAdd);
 

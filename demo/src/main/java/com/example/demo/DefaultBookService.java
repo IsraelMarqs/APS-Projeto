@@ -16,7 +16,7 @@ public class DefaultBookService implements BookService {
 
     @Override
     public List<Book> findAllOrdered() {
-        return bookRepository.findAllByOrderByTitleAsc();
+        return bookRepository.findByAvailableTrueOrderByTitleAsc();
     }
 
     @Override
