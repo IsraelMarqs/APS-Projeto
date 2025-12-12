@@ -1,5 +1,10 @@
-package com.example.demo;
+package com.example.demo.controller.advice;
 
+import com.example.demo.entity.LoanRequest;
+import com.example.demo.entity.User;
+import com.example.demo.repository.LoanRequestRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.security.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.ControllerAdvice;

@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -28,7 +28,7 @@ public class LoanRequest {
     private Instant createdAt = Instant.now();
 
     public enum Status {
-        PENDING, ACCEPTED, DECLINED
+        PENDING, ACCEPTED, DECLINED, RETURNED
     }
     private boolean seen = false;
     public LoanRequest() {}

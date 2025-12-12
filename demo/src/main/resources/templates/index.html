@@ -1,121 +1,164 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Biblioconnect</title>
     <style>
-        body { font-family: Inter, Arial, Helvetica, sans-serif; max-width: 900px; margin: 40px auto; background:#f6f8fb }
-        header { text-align:center; margin-bottom:20px }
-        h1 { color:#111827; letter-spacing: -0.5px }
-        .card { border: 1px solid #e6e9ee; padding: 20px; border-radius: 10px; box-shadow: 0 6px 18px rgba(31,45,61,0.04); margin-bottom:16px; background:white }
-        .btn { background:#4f46e5; color:white; padding:10px 16px; border-radius:8px; text-decoration:none; display:inline-block; transition:transform .12s ease, box-shadow .12s ease }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79,70,229,0.12) }
-        .muted { color:#6b7280; font-size:0.95em }
-        .user { float:right; font-size:0.95em }
-        .clear { clear:both }
-        .book-list { display:flex; flex-direction:column; gap:10px }
-        .book-item { border:1px solid #eef2ff; padding:14px; border-radius:10px; background:linear-gradient(180deg,#ffffff,#fbfbff) }
-        .book-meta { color:#374151; font-size:0.9em }
-        .actions { margin-top:8px }
-        .danger { background:#ef4444 }
-        .search { display:flex; gap:8px; align-items:center }
-        .search input[type=text] { padding:8px; flex:1; border:1px solid #e6e9ee; border-radius:8px }
-        .small-link { display:inline-block; margin-left:8px; color:#6b7280; text-decoration:none }
+        /* CSS Reset e Base */
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f3f4f6; color: #1f2937; }
+        a { text-decoration: none; color: inherit; transition: color 0.2s; }
+
+        /* Navbar Superior */
+        .navbar { background: white; border-bottom: 1px solid #e5e7eb; padding: 0 24px; height: 64px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        .logo { font-weight: 800; font-size: 1.25rem; color: #4f46e5; letter-spacing: -0.5px; }
+
+        /* Menu do Usuário (Direita) */
+        .user-menu { display: flex; align-items: center; gap: 20px; font-size: 0.95rem; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e7ff; }
+
+        /* Links e Badges */
+        .nav-link { color: #4b5563; font-weight: 500; position: relative; display: flex; align-items: center; }
+        .nav-link:hover { color: #111827; }
+        .badge-dot { position: absolute; top: -2px; right: -6px; background: #ef4444; color: white; border-radius: 10px; padding: 0 5px; font-size: 0.7rem; font-weight: bold; border: 2px solid white; }
+
+        /* Botões */
+        .btn { padding: 8px 16px; border-radius: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; border: 1px solid transparent; }
+        .btn-primary { background: #4f46e5; color: white; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-outline { background: white; border-color: #d1d5db; color: #374151; }
+        .btn-outline:hover { background: #f9fafb; border-color: #9ca3af; }
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+
+        /* Container Principal */
+        .container { max-width: 1024px; margin: 0 auto; padding: 32px 20px; }
+
+        /* Seção de Busca (Hero) */
+        .hero { text-align: center; margin-bottom: 40px; }
+        .hero h2 { font-size: 1.8rem; color: #111827; margin-bottom: 8px; }
+        .hero p { color: #6b7280; margin-bottom: 24px; }
+        .search-box { max-width: 600px; margin: 0 auto; display: flex; gap: 10px; }
+        .search-input { flex: 1; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .search-input:focus { outline: none; border-color: #4f46e5; ring: 2px solid #e0e7ff; }
+
+        /* Lista de Livros */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+
+        /* Card do Livro */
+        .book-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; height: 100%; }
+        .book-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #d1d5db; }
+
+        .book-title { font-size: 1.1rem; font-weight: 700; color: #111827; margin: 0 0 4px 0; }
+        .book-author { color: #6b7280; font-size: 0.9rem; margin-bottom: 12px; }
+
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: #f3f4f6; color: #4b5563; margin-right: 6px; }
+        .tag-category { background: #e0e7ff; color: #4338ca; }
+
+        .book-footer { margin-top: auto; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #f3f4f6; }
+        .owner-info { font-size: 0.8rem; color: #9ca3af; }
+        .owner-info strong { color: #6b7280; }
+
+        /* Estado Vazio */
+        .empty-state { text-align: center; padding: 60px 20px; color: #6b7280; background: white; border-radius: 12px; border: 1px dashed #d1d5db; }
+
+        @media (max-width: 640px) {
+            .navbar { padding: 0 16px; }
+            .user-menu span { display: none; } /* Esconde nome no mobile */
+            .book-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-<header>
-    <h1>Biblioconnect</h1>
-    <p class="muted">Sistema de empréstimo de livros entre alunos e comunidade — compartilhe, empreste e descubra leituras.</p>
-</header>
-<div class="card">
-    <div th:if="${userName}">
-        <div class="user">
-            <span th:if="${picture}"><img th:src="${picture}" alt="avatar" style="width:48px;height:48px;border-radius:50%;vertical-align:middle;margin-right:8px"/></span>
-            <a th:href="@{/profile}" style="text-decoration:none; color:inherit">
-                <strong th:text="${userName}">Usuário</strong>
+
+<nav class="navbar">
+    <a href="/" class="logo">Biblioconnect</a>
+
+    <div class="user-menu" th:if="${userName}">
+        <a th:href="@{/books/my-books}" class="nav-link">Meus Livros</a>
+
+        <a th:href="@{/requests}" class="nav-link">
+            Pedidos
+            <span th:if="${updatesCount > 0}" th:text="${updatesCount}" class="badge-dot"></span>
+        </a>
+
+        <a th:href="@{/requests/received}" class="nav-link">
+            Recebidos
+            <span th:if="${incomingCount > 0}" th:text="${incomingCount}" class="badge-dot"></span>
+        </a>
+
+        <div class="user-info">
+            <a th:href="@{/profile}" style="display:flex; align-items:center; gap:8px">
+                <img th:src="${picture != null && !picture.isEmpty() ? picture : 'https://ui-avatars.com/api/?name=' + userName + '&background=random'}" alt="Avatar" class="avatar">
+                <span th:text="${userName}" style="font-weight:600">Usuário</span>
             </a>
-            (<span th:text="${userEmail}">email</span>)
         </div>
-        <h2>Bem-vindo ao Biblioconnect</h2>
-        <p>Você está autenticado. Aqui no futuro você poderá procurar livros, listar seus empréstimos, cadastrar ofertas de livros e gerenciar solicitações.</p>
-        <p>
-            <a th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" class="btn">Sair</a>
 
-            <a th:href="@{/requests}" class="small-link" style="position:relative">
-                Meus pedidos
-                <span th:if="${updatesCount > 0}"
-                      th:text="${updatesCount}"
-                      style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px; position:absolute; top:-5px; right:-10px; font-weight:bold">
-                </span>
-            </a>
-
-            <a th:href="@{/requests/received}" class="small-link" style="position:relative; margin-left:15px">
-                Pedidos recebidos
-                <span th:if="${incomingCount > 0}"
-                      th:text="${incomingCount}"
-                      style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:10px; position:absolute; top:-5px; right:-10px; font-weight:bold">
-                </span>
-            </a>
-        </p>
-        <form id="logoutForm" th:action="@{/logout}" method="post" style="display:none">
+        <form th:action="@{/logout}" method="post" style="margin:0">
+            <button type="submit" class="btn btn-outline btn-sm">Sair</button>
         </form>
     </div>
 
-    <div th:unless="${userName}">
-        <h2>Entrar ou criar conta</h2>
-        <p>Para começar a compartilhar e pedir livros, faça login ou crie uma conta.</p>
-        <p>
-            <a class="btn" th:href="@{/login}">Entrar</a>
-            <span style="display:inline-block;width:10px"></span>
-            <a class="btn" th:href="@{/register}">Cadastrar</a>
-        </p>
-        <div th:if="${hasGoogle}">
-            <hr/>
-            <p class="muted">Ou entre com sua conta Google</p>
-            <a class="btn" th:href="@{/oauth2/authorization/google}">Entrar com Google</a>
-        </div>
+    <div class="user-menu" th:unless="${userName}">
+        <a th:href="@{/login}" class="nav-link">Entrar</a>
+        <a th:href="@{/register}" class="btn btn-primary btn-sm">Criar conta</a>
     </div>
-    <div class="clear"></div>
-</div>
+</nav>
 
-<div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-        <h2>Livros disponíveis</h2>
-        <div>
-            <a th:if="${canAdd}" class="btn" th:href="@{/books/new}">Adicionar livros</a>
-        </div>
-    </div>
+<div class="container">
 
-    <div style="margin-top:10px; margin-bottom:10px">
-        <form th:action="@{/}" method="get" class="search">
-            <input type="text" name="q" th:value="${q}" placeholder="Buscar por título ou autor" />
-            <button type="submit" class="btn">Buscar</button>
-            <a th:if="${q}" th:href="@{/}" style="margin-left:8px">Limpar</a>
+    <div class="hero">
+        <h2>Encontre sua próxima leitura</h2>
+        <p>Explore livros compartilhados pela comunidade acadêmica.</p>
+
+        <form th:action="@{/}" method="get" class="search-box">
+            <input type="text" name="q" th:value="${q}" class="search-input" placeholder="Buscar por título, autor ou categoria..." />
+            <button type="submit" class="btn btn-primary">Buscar</button>
+            <a th:if="${q}" th:href="@{/}" class="btn btn-outline">Limpar</a>
         </form>
     </div>
 
-    <div class="book-list">
-        <div class="book-item" th:each="book : ${books}">
+    <div class="section-header">
+        <h3 style="margin:0; font-size:1.2rem; color:#374151">Livros Disponíveis</h3>
+        <a th:if="${canAdd}" th:href="@{/books/new}" class="btn btn-primary">
+            + Novo Livro
+        </a>
+    </div>
+
+    <div class="book-grid">
+        <div class="book-card" th:each="book : ${books}">
             <div>
-                <strong th:text="${book.title}">Título</strong>
-                <span class="book-meta"> — <span th:text="${book.authors}">Autores</span></span>
+                <h4 class="book-title">
+                    <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">Título do Livro</a>
+                </h4>
+                <div class="book-author" th:text="${book.authors}">Autor Exemplo</div>
+
+                <div style="margin-bottom:12px">
+                    <span class="tag tag-category" th:text="${book.category}">Categoria</span>
+                    <span class="tag" th:text="${book.language}">Idioma</span>
+                </div>
+
+                <div style="font-size:0.9rem; color:#4b5563; line-height:1.4">
+                    <span th:text="${#strings.abbreviate(book.description, 100)}">Descrição...</span>
+                </div>
             </div>
-            <div class="book-meta">
-                <span th:if="${book.publishedYear}">Ano: <span th:text="${book.publishedYear}"></span> • </span>
-                <span th:if="${book.publisher}">Editora: <span th:text="${book.publisher}"></span> • </span>
-                <span>Categoria: <span th:text="${book.category}"></span></span>
-            </div>
-            <div class="book-meta">Local: <span th:text="${book.location}"></span> • Idioma: <span th:text="${book.language}"></span></div>
-            <div class="actions">
-                <a class="btn" th:href="@{/books/{id}(id=${book.id})}">Ver</a>
-                <span th:if="${book.owner != null}">
-                    <span class="muted">cadastrado por <strong th:text="${book.owner.name}"></strong></span>
-                </span>
+
+            <div class="book-footer">
+                    <span class="owner-info">
+                        por <strong th:text="${book.owner.name}">Dono</strong>
+                    </span>
+                <a class="btn btn-outline btn-sm" th:href="@{/books/{id}(id=${book.id})}">Ver Detalhes</a>
             </div>
         </div>
-        <div th:if="${#lists.isEmpty(books)}" class="muted">Nenhum livro cadastrado ainda.</div>
     </div>
+
+    <div th:if="${#lists.isEmpty(books)}" class="empty-state">
+        <p style="font-size:1.1rem; margin-bottom:10px">Nenhum livro encontrado.</p>
+        <p th:if="${q}">Tente buscar por outro termo ou limpe a busca.</p>
+        <p th:unless="${q}">Seja o primeiro a compartilhar conhecimento!</p>
+        <a th:if="${canAdd}" th:href="@{/books/new}" class="btn btn-primary" style="margin-top:15px">Cadastrar Livro</a>
+    </div>
+
 </div>
 
 </body>

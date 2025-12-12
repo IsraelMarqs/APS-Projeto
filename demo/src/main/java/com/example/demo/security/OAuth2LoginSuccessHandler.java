@@ -1,5 +1,7 @@
-package com.example.demo;
+package com.example.demo.security;
 
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

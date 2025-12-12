@@ -1,5 +1,13 @@
-package com.example.demo;
+package com.example.demo.controller;
 
+import com.example.demo.entity.Book;
+import com.example.demo.entity.LoanRequest;
+import com.example.demo.entity.User;
+import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.LoanRequestRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.security.CustomUserDetails;
+import com.example.demo.service.BookService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -113,23 +121,20 @@ public class LoanRequestController {
         if (olr.isEmpty()) return "redirect:/requests/received";
         LoanRequest request = olr.get();
 
-        // Segurança: só o dono pode responder
+        // Segurança
         if (request.getBook().getOwner() == null || !email.equals(request.getBook().getOwner().getEmail())) {
             return "redirect:/requests/received";
         }
 
         if ("accept".equalsIgnoreCase(action)) {
-            // Lógica de Exclusividade:
-
-            // 1. Aceita este pedido
             request.setStatus(LoanRequest.Status.ACCEPTED);
 
-            // 2. Marca livro como indisponível
+            // Tira da vitrine
             Book book = request.getBook();
             book.setAvailable(false);
             bookRepository.save(book);
 
-            // 3. Recusa automaticamente os outros pedidos PENDENTES deste livro
+            // Recusa concorrentes
             List<LoanRequest> pendingRequests = loanRequestRepository.findByBookAndStatus(book, LoanRequest.Status.PENDING);
             for (LoanRequest other : pendingRequests) {
                 if (!other.getId().equals(request.getId())) {
@@ -140,9 +145,27 @@ public class LoanRequestController {
 
         } else if ("decline".equalsIgnoreCase(action)) {
             request.setStatus(LoanRequest.Status.DECLINED);
+
+        } else if ("return_archive".equalsIgnoreCase(action)) {
+            // NOVO: Devolve mas mantém escondido
+            request.setStatus(LoanRequest.Status.RETURNED);
+            // Garantir que continua indisponível
+            Book book = request.getBook();
+            book.setAvailable(false);
+            bookRepository.save(book);
+
+        } else if ("return_repost".equalsIgnoreCase(action)) {
+            // NOVO: Devolve e põe na vitrine de novo
+            request.setStatus(LoanRequest.Status.RETURNED);
+            Book book = request.getBook();
+            book.setAvailable(true);
+            bookRepository.save(book);
         }
 
+        // Marca como não visto para o solicitante saber que mudou
+        request.setSeen(false);
         loanRequestRepository.save(request);
+
         return "redirect:/requests/received";
     }
 

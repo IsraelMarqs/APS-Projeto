@@ -2,107 +2,163 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${book.id} != null ? 'Editar livro' : 'Adicionar livro'">Formulário de Livro</title>
+    <title th:text="${book.id} != null ? 'Editar Livro' : 'Novo Livro'">Biblioconnect</title>
     <style>
-        body { font-family: Arial, Helvetica, sans-serif; max-width:700px; margin:40px auto }
-        .card { border:1px solid #ddd; padding:20px; border-radius:6px }
-        .field { margin-bottom:10px }
-        label { display:block; font-weight:bold }
-        input[type=text], textarea, select { width:100%; padding:8px; box-sizing:border-box }
-        .btn { background:#4285F4; color:white; padding:8px 12px; border-radius:4px; text-decoration:none }
+        body { font-family: Inter, Arial, Helvetica, sans-serif; max-width: 800px; margin: 40px auto; background:#f6f8fb; color:#111827 }
+
+        .card { background: white; border: 1px solid #e6e9ee; padding: 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+        h2 { margin-top: 0; color: #111827; font-size: 1.5em; margin-bottom: 24px; border-bottom: 1px solid #f3f4f6; padding-bottom: 15px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: span 2; }
+
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9em; color: #374151; }
+
+        /* Estilo para o asterisco de obrigatório */
+        .required { color: #dc2626; margin-left: 2px; }
+
+        input[type=text], input[type=number], select, textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+            box-sizing: border-box; font-family: inherit; font-size: 0.95em; transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus { border-color: #4f46e5; outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+
+        .btn-group { margin-top: 30px; display: flex; gap: 10px; align-items: center; }
+
+        .btn { background: #4f46e5; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; transition: all 0.2s; }
+        .btn:hover { background: #4338ca; transform: translateY(-1px); }
+
+        .btn-secondary { background: white; color: #374151; border: 1px solid #d1d5db; }
+        .btn-secondary:hover { background: #f9fafb; border-color: #9ca3af; }
+
+        .btn-ai { background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: none; color: white; font-size: 0.9em; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-left: auto; white-space: nowrap; }
+        .btn-ai:hover { opacity: 0.9; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
+
+        .ai-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .ai-status { font-size: 0.85em; color: #6b7280; font-style: italic; margin-left: 10px; }
+
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
     </style>
 </head>
 <body>
+
 <div class="card">
-    <h2 th:text="${book.id} != null ? 'Editar livro' : 'Adicionar livro'"></h2>
+    <h2 th:text="${book.id} != null ? 'Editar Livro' : 'Cadastrar Novo Livro'"></h2>
+
+    <p style="font-size:0.85em; color:#6b7280; margin-bottom:20px; text-align:right">
+        <span class="required">*</span> Campos obrigatórios
+    </p>
+
     <form th:action="${formAction}" method="post" th:object="${book}">
-        <div class="field">
-            <label for="title">Título</label>
-            <input type="text" id="title" th:field="*{title}" />
-        </div>
-        <div class="field">
-            <label for="authors">Autor(es)</label>
-            <input type="text" id="authors" th:field="*{authors}" placeholder="Separe múltiplos autores por vírgula" />
-        </div>
-        <div class="field">
-            <label for="publishedYear">Ano</label>
-            <input type="number" id="publishedYear" th:field="*{publishedYear}" />
-        </div>
-        <div class="field">
-            <label for="publisher">Editora</label>
-            <input type="text" id="publisher" th:field="*{publisher}" />
-        </div>
-        <div class="field">
-            <label for="category">Categoria</label>
-            <select id="category" th:field="*{category}">
-                <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
-            </select>
-        </div>
-        <div class="field">
-            <label for="language">Idioma</label>
-            <input type="text" id="language" th:field="*{language}" />
-        </div>
-        <div class="field">
-            <label for="location">Localização de encontro</label>
-            <input type="text" id="location" th:field="*{location}" />
-        </div>
-        <div class="field">
-            <label for="description">Descrição / Resumo</label>
-            <div style="display:flex; gap:10px; align-items:start">
-                <textarea id="description" th:field="*{description}" rows="4" placeholder="Escreva um resumo ou gere com IA..."></textarea>
-
-                <button type="button" onclick="gerarDescricao()" class="btn" style="background:#8b5cf6; white-space:nowrap">
-                    ✨ Gerar com IA
-                </button>
+        <div class="form-grid">
+            <div class="full-width">
+                <label for="title">Título do Livro <span class="required">*</span></label>
+                <input type="text" id="title" th:field="*{title}" placeholder="Ex: O Senhor dos Anéis" required />
             </div>
-            <small id="aiStatus" style="color:#6b7280"></small>
+
+            <div class="full-width">
+                <label for="authors">Autor(es) <span class="required">*</span></label>
+                <input type="text" id="authors" th:field="*{authors}" placeholder="Ex: J.R.R. Tolkien (separe por vírgula)" required />
+            </div>
+
+            <div>
+                <label for="category">Categoria</label>
+                <select id="category" th:field="*{category}">
+                    <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+                </select>
+            </div>
+
+            <div>
+                <label for="publishedYear">Ano de Publicação</label>
+                <input type="number" id="publishedYear" th:field="*{publishedYear}" placeholder="Ex: 1954" />
+            </div>
+
+            <div>
+                <label for="publisher">Editora</label>
+                <input type="text" id="publisher" th:field="*{publisher}" />
+            </div>
+
+            <div>
+                <label for="language">Idioma</label>
+                <input type="text" id="language" th:field="*{language}" placeholder="Ex: Português" />
+            </div>
+
+            <div class="full-width">
+                <label for="location">Local de Entrega (Onde o livro está?)</label>
+                <input type="text" id="location" th:field="*{location}" placeholder="Ex: Campus Bloco A, Centro da Cidade..." />
+            </div>
+
+            <div class="full-width">
+                <label for="contactNumber">Contato (WhatsApp/Telegram) <span class="required">*</span></label>
+                <input type="text" id="contactNumber" th:field="*{contactNumber}" placeholder="Para facilitar o encontro..." required />
+            </div>
+
+            <div class="full-width">
+                <div class="ai-container">
+                    <label for="description" style="margin:0">Descrição / Sinopse</label>
+                    <div>
+                        <span id="aiStatus" class="ai-status"></span>
+                        <button type="button" onclick="gerarDescricao()" class="btn-ai">
+                            ✨ Gerar com IA
+                        </button>
+                    </div>
+                </div>
+                <textarea id="description" th:field="*{description}" placeholder="Escreva um resumo ou clique no botão acima para gerar automaticamente..."></textarea>
+            </div>
         </div>
 
-        <script>
-            function gerarDescricao() {
-                const title = document.getElementById('title').value;
-                const authors = document.getElementById('authors').value;
-                const status = document.getElementById('aiStatus');
-                const descField = document.getElementById('description');
-
-                // CORREÇÃO: Com CSRF desativado, não buscamos nem enviamos o token
-                // const csrfToken = document.querySelector('input[name="_csrf"]').value;
-
-                if(!title) {
-                    alert("Preencha o título do livro primeiro!");
-                    return;
-                }
-
-                status.innerText = "Pensando...";
-
-                fetch('/books/generate-description', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                        // 'X-CSRF-TOKEN': csrfToken  <-- Removido do header
-                    },
-                    body: JSON.stringify({ title: title, authors: authors })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        descField.value = data.description;
-                        status.innerText = "";
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        status.innerText = "Erro ao conectar com a IA.";
-                    });
-            }
-        </script>
-        <div class="field">
-            <label for="contactNumber">Número de contato (destaque)</label>
-            <input type="text" id="contactNumber" th:field="*{contactNumber}" />
-        </div>
-        <div>
-            <button type="submit" class="btn">Salvar</button>
-            <a th:href="@{/}" style="margin-left:8px">Cancelar</a>
+        <div class="btn-group">
+            <button type="submit" class="btn">Salvar Livro</button>
+            <a th:href="@{/}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
+
+    <form th:if="${book.id}" th:action="@{/books/{id}/delete(id=${book.id})}" method="post" style="margin-top:20px; text-align:right">
+        <button type="submit" class="btn" style="background:#fee2e2; color:#991b1b; padding:8px 16px; font-size:0.9em" onclick="return confirm('Tem certeza que deseja excluir este livro?')">
+            Excluir este livro
+        </button>
+    </form>
 </div>
+
+<script>
+    function gerarDescricao() {
+        const title = document.getElementById('title').value;
+        const authors = document.getElementById('authors').value;
+        const status = document.getElementById('aiStatus');
+        const descField = document.getElementById('description');
+
+        if(!title) {
+            alert("Preencha o título do livro primeiro para usar a IA.");
+            return;
+        }
+
+        status.innerText = "Criando resumo...";
+        document.querySelector('.btn-ai').disabled = true;
+
+        fetch('/books/generate-description', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: title, authors: authors })
+        })
+            .then(response => response.json())
+            .then(data => {
+                descField.value = data.description;
+                status.innerText = "Pronto!";
+                setTimeout(() => status.innerText = "", 3000);
+            })
+            .catch(err => {
+                console.error(err);
+                status.innerText = "Erro na IA.";
+            })
+            .finally(() => {
+                document.querySelector('.btn-ai').disabled = false;
+            });
+    }
+</script>
+
 </body>
 </html>

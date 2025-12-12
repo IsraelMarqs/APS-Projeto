@@ -1,7 +1,11 @@
-package com.example.demo;
+package com.example.demo.repository;
 
 import java.util.Collection;
 import java.util.List;
+
+import com.example.demo.entity.Book;
+import com.example.demo.entity.LoanRequest;
+import com.example.demo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

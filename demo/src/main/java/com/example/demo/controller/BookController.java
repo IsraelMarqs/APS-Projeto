@@ -1,5 +1,12 @@
-package com.example.demo;
+package com.example.demo.controller;
 
+import com.example.demo.entity.Book;
+import com.example.demo.entity.User;
+import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.security.CustomUserDetails;
+import com.example.demo.service.AIService;
+import com.example.demo.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -8,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,11 +26,13 @@ public class BookController {
     private final BookService bookService;
     private final UserRepository userRepository;
     private final AIService aiService;
+    private final BookRepository bookRepository;
 
-    public BookController(BookService bookService, UserRepository userRepository, AIService aiService) {
+    public BookController(BookService bookService, UserRepository userRepository, AIService aiService, BookRepository bookRepository) {
         this.bookService = bookService;
         this.userRepository = userRepository;
         this.aiService = aiService;
+        this.bookRepository = bookRepository;
     }
 
     // --- CRIAR LIVRO ---
@@ -158,6 +168,23 @@ public class BookController {
         String authors = payload.get("authors");
         String description = aiService.generateBookDescription(title, authors);
         return Map.of("description", description);
+    }
+
+    // --- 2. NOVO MÉTODO: MEUS LIVROS ---
+    @GetMapping("/my-books")
+    public String myBooks(Model model, Authentication authentication) {
+        String email = getAuthenticatedEmail(authentication);
+        if (email == null) return "redirect:/login";
+
+        // Busca o usuário no banco para pegar o objeto User completo
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) return "redirect:/login";
+
+        // Busca os livros desse usuário
+        List<Book> myBooks = bookRepository.findByOwnerOrderByTitleAsc(userOpt.get());
+
+        model.addAttribute("books", myBooks);
+        return "my_books";
     }
 
     // --- MÉTODOS AUXILIARES ---
