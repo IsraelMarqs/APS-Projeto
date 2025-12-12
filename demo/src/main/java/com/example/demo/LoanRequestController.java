@@ -13,12 +13,12 @@ import java.util.Optional;
 public class LoanRequestController {
 
     private final LoanRequestRepository loanRequestRepository;
-    private final BookRepository bookRepository;
+    private final BookService bookService;
     private final UserRepository userRepository;
 
-    public LoanRequestController(LoanRequestRepository loanRequestRepository, BookRepository bookRepository, UserRepository userRepository) {
+    public LoanRequestController(LoanRequestRepository loanRequestRepository, BookService bookService, UserRepository userRepository) {
         this.loanRequestRepository = loanRequestRepository;
-        this.bookRepository = bookRepository;
+        this.bookService = bookService;
         this.userRepository = userRepository;
     }
 
@@ -28,7 +28,7 @@ public class LoanRequestController {
         if (email == null) {
             return "redirect:/login";
         }
-        Optional<Book> ob = bookRepository.findById(id);
+        Optional<Book> ob = bookService.findById(id);
         if (ob.isEmpty()) return "redirect:/";
         Book book = ob.get();
         // cannot request your own book
@@ -101,4 +101,3 @@ public class LoanRequestController {
         return null;
     }
 }
-

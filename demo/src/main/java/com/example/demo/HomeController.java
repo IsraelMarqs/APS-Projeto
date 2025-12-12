@@ -14,13 +14,13 @@ import java.util.List;
 public class HomeController {
 
     private final Environment env;
-    private final BookRepository bookRepository;
+    private final BookService bookService;
 
     private final UserRepository userRepository;
 
-    public HomeController(Environment env, BookRepository bookRepository, UserRepository userRepository) {
+    public HomeController(Environment env, BookService bookService, UserRepository userRepository) {
         this.env = env;
-        this.bookRepository = bookRepository;
+        this.bookService = bookService;
         this.userRepository = userRepository;
     }
 
@@ -46,9 +46,9 @@ public class HomeController {
 
         List<Book> books;
         if (q != null && !q.isBlank()) {
-            books = bookRepository.findByTitleContainingIgnoreCaseOrAuthorsContainingIgnoreCaseOrderByTitleAsc(q, q);
+            books = bookService.search(q);
         } else {
-            books = bookRepository.findAllByOrderByTitleAsc();
+            books = bookService.findAllOrdered();
         }
         model.addAttribute("books", books);
         model.addAttribute("q", q == null ? "" : q);
