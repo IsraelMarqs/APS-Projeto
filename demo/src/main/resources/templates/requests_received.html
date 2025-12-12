@@ -33,13 +33,13 @@
         <div style="margin-top:8px" class="small" th:if="${r.message}">Mensagem: <span th:text="${r.message}"></span></div>
         <div style="margin-top:10px">
             <a th:href="@{/books/{id}(id=${r.book.id})}" class="btn">Ver livro</a>
+
             <form th:if="${r.status.name() == 'PENDING'}" th:action="@{/requests/{id}/respond(id=${r.id})}" method="post" class="inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" name="action" value="accept" />
                 <button type="submit" class="btn">Aceitar</button>
             </form>
+
             <form th:if="${r.status.name() == 'PENDING'}" th:action="@{/requests/{id}/respond(id=${r.id})}" method="post" class="inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" name="action" value="decline" />
                 <button type="submit" class="btn danger">Recusar</button>
             </form>
@@ -48,4 +48,3 @@
 </div>
 </body>
 </html>
-

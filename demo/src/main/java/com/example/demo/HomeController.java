@@ -15,7 +15,6 @@ public class HomeController {
 
     private final Environment env;
     private final BookService bookService;
-
     private final UserRepository userRepository;
 
     public HomeController(Environment env, BookService bookService, UserRepository userRepository) {
@@ -26,12 +25,14 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model, Authentication authentication, @RequestParam(value = "q", required = false) String q) {
-        boolean hasGoogle = false;
-        String clientId = env.getProperty("GOOGLE_CLIENT_ID");
-        if (clientId != null && !clientId.isBlank()) hasGoogle = true;
+        // 1. Verifica se o Google Login está configurado (Environment ou Properties)
+        String envId = env.getProperty("GOOGLE_CLIENT_ID");
+        String propId = env.getProperty("spring.security.oauth2.client.registration.google.client-id");
+        boolean hasGoogle = (envId != null && !envId.isBlank()) || (propId != null && !propId.isBlank());
 
         model.addAttribute("hasGoogle", hasGoogle);
 
+        // 2. Lógica de Autenticação (OAuth ou Login padrão)
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof OAuth2User oauth) {
@@ -44,6 +45,7 @@ public class HomeController {
             }
         }
 
+        // 3. Busca de livros
         List<Book> books;
         if (q != null && !q.isBlank()) {
             books = bookService.search(q);
@@ -53,7 +55,7 @@ public class HomeController {
         model.addAttribute("books", books);
         model.addAttribute("q", q == null ? "" : q);
 
-        // Determine if authenticated internal user can add books
+        // 4. Verifica permissão de adicionar livros (Apenas usuários internos por enquanto)
         boolean canAdd = false;
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof CustomUserDetails) {
             canAdd = true;

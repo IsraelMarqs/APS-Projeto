@@ -29,12 +29,11 @@
                 <span th:text="${errorMessage}"></span>
               </div>
 
-              <form th:action="@{/login}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="mb-3">
-                  <label for="email" class="form-label">Email</label>
-                  <input type="email" class="form-control" id="email" name="email" placeholder="seu@exemplo.com" required>
-                </div>
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="seu@exemplo.com" required>
+                    </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Senha</label>
                   <input type="password" class="form-control" id="password" name="password" placeholder="Senha" required>
@@ -46,12 +45,11 @@
 
               <div class="text-center mb-3 text-muted">ou</div>
 
-              <div class="d-grid gap-2 mb-3">
-                <a th:if="${hasGoogle}" class="btn btn-outline-dark" th:href="@{/oauth2/authorization/google}">
-                  <img src="https://www.gstatic.com/devrel-devsite/prod/vc3c6d53295d85f1e4b74e6a1afd37d399a8ce28b5c828a7ea50ccaa43d562eeb/google.svg" alt="Google" style="height:18px;margin-right:8px;"> Entrar com Google
-                </a>
-                <div th:unless="${hasGoogle}" class="text-center text-muted small">Login com Google não configurado</div>
-              </div>
+                <div class="d-grid gap-2 mb-3">
+                    <a class="btn btn-outline-dark" th:href="@{/oauth2/authorization/google}">
+                        <img src="https://www.gstatic.com/devrel-devsite/prod/vc3c6d53295d85f1e4b74e6a1afd37d399a8ce28b5c828a7ea50ccaa43d562eeb/google.svg" alt="Google" style="height:18px;margin-right:8px;"> Entrar com Google
+                    </a>
+                </div>
 
               <hr>
               <p class="text-center">Ainda não tem uma conta? <a th:href="@{/register}">Cadastre-se</a></p>
