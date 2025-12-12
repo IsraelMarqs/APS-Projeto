@@ -48,6 +48,54 @@
             <input type="text" id="location" th:field="*{location}" />
         </div>
         <div class="field">
+            <label for="description">Descrição / Resumo</label>
+            <div style="display:flex; gap:10px; align-items:start">
+                <textarea id="description" th:field="*{description}" rows="4" placeholder="Escreva um resumo ou gere com IA..."></textarea>
+
+                <button type="button" onclick="gerarDescricao()" class="btn" style="background:#8b5cf6; white-space:nowrap">
+                    ✨ Gerar com IA
+                </button>
+            </div>
+            <small id="aiStatus" style="color:#6b7280"></small>
+        </div>
+
+        <script>
+            function gerarDescricao() {
+                const title = document.getElementById('title').value;
+                const authors = document.getElementById('authors').value;
+                const status = document.getElementById('aiStatus');
+                const descField = document.getElementById('description');
+
+                // Precisamos do token CSRF do Spring Security
+                const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+                if(!title) {
+                    alert("Preencha o título do livro primeiro!");
+                    return;
+                }
+
+                status.innerText = "Pensando...";
+
+                fetch('/books/generate-description', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ title: title, authors: authors })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        descField.value = data.description;
+                        status.innerText = "";
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        status.innerText = "Erro ao conectar com a IA.";
+                    });
+            }
+        </script>
+        <div class="field">
             <label for="contactNumber">Número de contato (destaque)</label>
             <input type="text" id="contactNumber" th:field="*{contactNumber}" />
         </div>

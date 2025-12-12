@@ -28,6 +28,9 @@ public class Book {
 
     private String location;
 
+    @Column(length = 2000)
+    private String description;
+
     @NotBlank
     private String contactNumber;
 
@@ -67,4 +70,7 @@ public class Book {
 
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

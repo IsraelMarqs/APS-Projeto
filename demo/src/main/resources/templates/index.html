@@ -32,7 +32,9 @@
     <div th:if="${userName}">
         <div class="user">
             <span th:if="${picture}"><img th:src="${picture}" alt="avatar" style="width:48px;height:48px;border-radius:50%;vertical-align:middle;margin-right:8px"/></span>
-            <strong th:text="${userName}">Usuário</strong>
+            <a th:href="@{/profile}" style="text-decoration:none; color:inherit">
+                <strong th:text="${userName}">Usuário</strong>
+            </a>
             (<span th:text="${userEmail}">email</span>)
         </div>
         <h2>Bem-vindo ao Biblioconnect</h2>

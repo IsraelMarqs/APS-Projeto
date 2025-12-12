@@ -22,6 +22,11 @@ public class User {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
+    @Column(length = 1000) // URLs podem ser longas
+    private String avatarUrl;
+
+    @Column(length = 500)
+    private String bio;
 
     public User() {
     }
@@ -71,5 +76,11 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 }
 

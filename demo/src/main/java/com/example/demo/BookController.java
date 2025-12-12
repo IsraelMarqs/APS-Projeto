@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -16,10 +17,12 @@ public class BookController {
 
     private final BookService bookService;
     private final UserRepository userRepository;
+    private final AIService aiService; // 1. Injetar o serviço
 
-    public BookController(BookService bookService, UserRepository userRepository) {
+    public BookController(BookService bookService, UserRepository userRepository, AIService aiService) {
         this.bookService = bookService;
         this.userRepository = userRepository;
+        this.aiService = aiService;
     }
 
     @GetMapping("/new")
@@ -120,6 +123,17 @@ public class BookController {
         Book book = opt.get();
         model.addAttribute("book", book);
         return "request";
+    }
+
+    @PostMapping("/generate-description")
+    @ResponseBody // Importante: indica que retorna dados, não uma página HTML
+    public Map<String, String> generateDescription(@RequestBody Map<String, String> payload) {
+        String title = payload.get("title");
+        String authors = payload.get("authors");
+
+        String description = aiService.generateBookDescription(title, authors);
+
+        return Map.of("description", description);
     }
 
     private boolean isOwner(Authentication authentication, Book book) {
